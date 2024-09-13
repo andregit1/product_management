@@ -1,0 +1,425 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: andreas
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            tableExists:
+              tableName: user
+      changes:
+        - createTable:
+            tableName: user
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: username
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 2
+      author: andreas
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            tableExists:
+              tableName: product
+      changes:
+        - createTable:
+            tableName: product
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: DECIMAL(10, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: checked_by
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_product_checked_by
+                    references: user(id)
+              - column:
+                  name: created_by
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_product_created_by
+                    references: user(id)
+
+  - changeSet:
+      id: 3
+      author: andreas
+      changes:
+        - insert:
+            tableName: user
+            columns:
+              - column:
+                  name: username
+                  value: admin
+              - column:
+                  name: password
+                  value: 123123123
+              - column:
+                  name: role
+                  value: ADMIN
+        - insert:
+            tableName: user
+            columns:
+              - column:
+                  name: username
+                  value: demoUser0
+              - column:
+                  name: password
+                  value: 123123123
+              - column:
+                  name: role
+                  value: MEMBER
+
+  - changeSet:
+      id: 4
+      author: andreas
+      changes:
+        # 5 Approved Products
+        - insert:
+            tableName: product
+            columns:
+              - column:
+                  name: name
+                  value: UltraTech Laptop
+              - column:
+                  name: price
+                  value: 1500.00
+              - column:
+                  name: description
+                  value: 'A high-end laptop designed for professionals.'
+              - column:
+                  name: status
+                  value: APPROVED
+              - column:
+                  name: checked_by
+                  value: 1 # Admin ID
+              - column:
+                  name: created_by
+                  value: 2 # demoUser0 ID
+        - insert:
+            tableName: product
+            columns:
+              - column:
+                  name: name
+                  value: PowerMax Smartphone
+              - column:
+                  name: price
+                  value: 799.00
+              - column:
+                  name: description
+                  value: 'Latest generation smartphone with cutting-edge features.'
+              - column:
+                  name: status
+                  value: APPROVED
+              - column:
+                  name: checked_by
+                  value: 1
+              - column:
+                  name: created_by
+                  value: 2
+        - insert:
+            tableName: product
+            columns:
+              - column:
+                  name: name
+                  value: HyperAir Wireless Earbuds
+              - column:
+                  name: price
+                  value: 199.00
+              - column:
+                  name: description
+                  value: 'Noise-cancelling wireless earbuds with long battery life.'
+              - column:
+                  name: status
+                  value: APPROVED
+              - column:
+                  name: checked_by
+                  value: 1
+              - column:
+                  name: created_by
+                  value: 2
+        - insert:
+            tableName: product
+            columns:
+              - column:
+                  name: name
+                  value: QuantumDesk Standing Desk
+              - column:
+                  name: price
+                  value: 600.00
+              - column:
+                  name: description
+                  value: 'Ergonomically designed adjustable standing desk.'
+              - column:
+                  name: status
+                  value: APPROVED
+              - column:
+                  name: checked_by
+                  value: 1
+              - column:
+                  name: created_by
+                  value: 2
+        - insert:
+            tableName: product
+            columns:
+              - column:
+                  name: name
+                  value: FlexiChair Pro
+              - column:
+                  name: price
+                  value: 350.00
+              - column:
+                  name: description
+                  value: 'Premium office chair with lumbar support and recline feature.'
+              - column:
+                  name: status
+                  value: APPROVED
+              - column:
+                  name: checked_by
+                  value: 1
+              - column:
+                  name: created_by
+                  value: 2
+
+        # 5 Pending Products
+        - insert:
+            tableName: product
+            columns:
+              - column:
+                  name: name
+                  value: EcoFriendly Water Bottle
+              - column:
+                  name: price
+                  value: 30.00
+              - column:
+                  name: description
+                  value: 'A reusable water bottle made from sustainable materials.'
+              - column:
+                  name: status
+                  value: PENDING
+              - column:
+                  name: created_by
+                  value: 2
+        - insert:
+            tableName: product
+            columns:
+              - column:
+                  name: name
+                  value: SolarPhone Charger
+              - column:
+                  name: price
+                  value: 75.00
+              - column:
+                  name: description
+                  value: 'A portable phone charger powered by solar energy.'
+              - column:
+                  name: status
+                  value: PENDING
+              - column:
+                  name: created_by
+                  value: 2
+        - insert:
+            tableName: product
+            columns:
+              - column:
+                  name: name
+                  value: SmartThermostat XT
+              - column:
+                  name: price
+                  value: 299.00
+              - column:
+                  name: description
+                  value: 'Wi-Fi enabled thermostat for controlling home temperatures remotely.'
+              - column:
+                  name: status
+                  value: PENDING
+              - column:
+                  name: created_by
+                  value: 2
+        - insert:
+            tableName: product
+            columns:
+              - column:
+                  name: name
+                  value: CleanAir Humidifier
+              - column:
+                  name: price
+                  value: 120.00
+              - column:
+                  name: description
+                  value: 'A quiet, energy-efficient humidifier for cleaner air.'
+              - column:
+                  name: status
+                  value: PENDING
+              - column:
+                  name: created_by
+                  value: 2
+        - insert:
+            tableName: product
+            columns:
+              - column:
+                  name: name
+                  value: BrightLamp LED Desk Lamp
+              - column:
+                  name: price
+                  value: 45.00
+              - column:
+                  name: description
+                  value: 'An adjustable LED desk lamp with multiple light settings.'
+              - column:
+                  name: status
+                  value: PENDING
+              - column:
+                  name: created_by
+                  value: 2
+
+        # 5 Rejected Products
+        - insert:
+            tableName: product
+            columns:
+              - column:
+                  name: name
+                  value: VintageGram Vinyl Player
+              - column:
+                  name: price
+                  value: 500.00
+              - column:
+                  name: description
+                  value: 'A retro-style vinyl record player with modern features.'
+              - column:
+                  name: status
+                  value: REJECTED
+              - column:
+                  name: checked_by
+                  value: 1
+              - column:
+                  name: created_by
+                  value: 2
+        - insert:
+            tableName: product
+            columns:
+              - column:
+                  name: name
+                  value: SmartMirror XR
+              - column:
+                  name: price
+                  value: 700.00
+              - column:
+                  name: description
+                  value: 'A smart mirror with integrated AI for personalized health tracking.'
+              - column:
+                  name: status
+                  value: REJECTED
+              - column:
+                  name: checked_by
+                  value: 1
+              - column:
+                  name: created_by
+                  value: 2
+        - insert:
+            tableName: product
+            columns:
+              - column:
+                  name: name
+                  value: AirCooler Max
+              - column:
+                  name: price
+                  value: 250.00
+              - column:
+                  name: description
+                  value: 'Portable air cooler with advanced cooling technology.'
+              - column:
+                  name: status
+                  value: REJECTED
+              - column:
+                  name: checked_by
+                  value: 1
+              - column:
+                  name: created_by
+                  value: 2
+        - insert:
+            tableName: product
+            columns:
+              - column:
+                  name: name
+                  value: UltraCam Pro Camera
+              - column:
+                  name: price
+                  value: 1200.00
+              - column:
+                  name: description
+                  value: 'A professional-grade digital camera for photography enthusiasts.'
+              - column:
+                  name: status
+                  value: REJECTED
+              - column:
+                  name: checked_by
+                  value: 1
+              - column:
+                  name: created_by
+                  value: 2
+        - insert:
+            tableName: product
+            columns:
+              - column:
+                  name: name
+                  value: SmartPet Feeder
+              - column:
+                  name: price
+                  value: 150.00
+              - column:
+                  name: description
+                  value: 'An automatic pet feeder with smart scheduling and portion control.'
+              - column:
+                  name: status
+                  value: REJECTED
+              - column:
+                  name: checked_by
+                  value: 1
+              - column:
+                  name: created_by
+                  value: 2

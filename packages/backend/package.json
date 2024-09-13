@@ -1,0 +1,12 @@
+{
+  "name": "backend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "initiate": "mvn clean install",
+    "dev": "mvn spring-boot:run",
+    "test": "mvn test",
+    "build": "mvn package -DskipTests",
+    "start": "java -jar target/*.jar"
+  }
+}

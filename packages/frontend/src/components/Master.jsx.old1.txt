@@ -1,0 +1,223 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+// Combined Component: LoginForm and ProductTable
+const LoginAndProductTable = () => {
+	const [username, setUsername] = useState('');
+	const [password, setPassword] = useState('');
+	const [isLoggedIn, setIsLoggedIn] = useState(false);
+	const [isAdmin, setIsAdmin] = useState(false);
+	const [error, setError] = useState('');
+	const [products, setProducts] = useState([]);
+	const [isFormOpen, setIsFormOpen] = useState(false);
+	const [editProduct, setEditProduct] = useState(null);
+
+	const apiUrl = 'http://localhost:8080/api';
+	const urlProducts = `${apiUrl}/products`;
+	const urlUsers = `${apiUrl}/users`;
+
+	// Handle user login
+	const handleLogin = async () => {
+		setError('');
+		if (!username || !password) {
+			setError('Username and password cannot be empty.');
+			return;
+		}
+		try {
+			const response = await axios.post(`${urlUsers}/login`, { username, password });
+			setIsLoggedIn(true);
+			setIsAdmin(response.data.role === 'ADMIN');
+			setUsername('');
+			setPassword('');
+			fetchProducts(); // Fetch products after login
+		} catch (err) {
+			setError('Login failed. Please try again.');
+		}
+	};
+
+	// Handle user logout
+	const handleLogout = async () => {
+		try {
+			await axios.post(`${apiUrl}/logout`);
+			setIsLoggedIn(false);
+			setIsAdmin(false);
+			fetchProducts(); // Fetch products after logout
+		} catch (err) {
+			setError('Logout failed. Please try again.');
+		}
+	};
+
+	// Fetch products based on user role and login status
+	const fetchProducts = async () => {
+		try {
+			const response = await axios.get(urlProducts);
+			if (isAdmin) {
+				// Filter products for admin role if needed
+				setProducts(response.data.filter((product) => product.status === 'pending'));
+			} else {
+				setProducts(response.data);
+			}
+		} catch (err) {
+			console.error('Failed to fetch products:', err);
+		}
+	};
+
+	// Handle product deletion
+	const handleDelete = async (id) => {
+		try {
+			await axios.delete(`${urlProducts}/${id}`);
+			setProducts(products.filter((product) => product.id !== id));
+		} catch (err) {
+			alert('Failed to delete product.');
+		}
+	};
+
+	// Handle product approval
+	const handleApprove = async (id) => {
+		try {
+			await axios.put(`${urlProducts}/${id}/approve`);
+			setProducts(products.map((product) => (product.id === id ? { ...product, status: 'approved' } : product)));
+		} catch (err) {
+			alert('Failed to approve product.');
+		}
+	};
+
+	// Handle product rejection
+	const handleReject = async (id) => {
+		try {
+			await axios.put(`${urlProducts}/${id}/reject`);
+			setProducts(products.map((product) => (product.id === id ? { ...product, status: 'rejected' } : product)));
+		} catch (err) {
+			alert('Failed to reject product.');
+		}
+	};
+
+	useEffect(() => {
+		fetchProducts(); // Fetch products on component mount
+	}, []);
+
+	return (
+		<div>
+			<div style={{ textAlign: 'right' }}>
+				{isLoggedIn ? (
+					<>
+						<span>Welcome, {username}</span>
+						<button onClick={handleLogout}>Logout</button>
+					</>
+				) : (
+					<>
+						<div className='form-inline'>
+							<input type='text' placeholder='Username' value={username} onChange={(e) => setUsername(e.target.value)} />
+							<input type='password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
+							<button onClick={handleLogin}>Login</button>
+						</div>
+						{error && <div style={{ color: 'red' }}>{error}</div>}
+					</>
+				)}
+			</div>
+
+			{isLoggedIn && (
+				<>
+					<button onClick={() => setIsFormOpen(true)}>Create Product</button>
+					{isFormOpen && (
+						<ProductForm
+							isOpen={isFormOpen}
+							onClose={() => setIsFormOpen(false)}
+							onProductSubmit={() => {
+								setIsFormOpen(false);
+								fetchProducts(); // Reload products after form submission
+							}}
+							initialProduct={editProduct}
+							defaultUrl={urlProducts}
+						/>
+					)}
+				</>
+			)}
+
+			<table style={{ marginTop: '2rem' }}>
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Price</th>
+						<th>Description</th>
+						{isLoggedIn && <th>Status</th>}
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{products.length ? (
+						products.map((product) => (
+							<tr key={product.id}>
+								<td>{product.name}</td>
+								<td>{product.price}</td>
+								<td>{product.description}</td>
+								{isLoggedIn && <td>{product.status}</td>}
+								<td>
+									{isLoggedIn && !isAdmin && (
+										<>
+											<button
+												onClick={() => {
+													setEditProduct(product);
+													setIsFormOpen(true);
+												}}
+											>
+												Edit
+											</button>
+											<button onClick={() => handleDelete(product.id)}>Delete</button>
+										</>
+									)}
+
+									{isAdmin && (
+										<>
+											<button onClick={() => handleApprove(product.id)}>Approve</button>
+											<button onClick={() => handleReject(product.id)}>Reject</button>
+										</>
+									)}
+								</td>
+							</tr>
+						))
+					) : (
+						<tr>
+							<td colSpan='5'>No products available.</td>
+						</tr>
+					)}
+				</tbody>
+			</table>
+		</div>
+	);
+};
+
+// ProductForm Component (assuming it is defined elsewhere or included here)
+const ProductForm = ({ isOpen, onClose, onProductSubmit, initialProduct, defaultUrl }) => {
+	const [name, setName] = useState(initialProduct?.name || '');
+	const [price, setPrice] = useState(initialProduct?.price || '');
+	const [description, setDescription] = useState(initialProduct?.description || '');
+
+	const handleSubmit = async () => {
+		// Submit product form
+		try {
+			if (initialProduct) {
+				// Edit product
+				await axios.put(`${defaultUrl}/${initialProduct.id}`, { name, price, description });
+			} else {
+				// Create new product
+				await axios.post(defaultUrl, { name, price, description });
+			}
+			onProductSubmit();
+		} catch (err) {
+			alert('Failed to submit product.');
+		}
+	};
+
+	return isOpen ? (
+		<div className='form-inline'>
+			<input type='text' placeholder='Product Name' value={name} onChange={(e) => setName(e.target.value)} />
+			<input type='text' placeholder='Price' value={price} onChange={(e) => setPrice(e.target.value)} />
+			<input type='text' placeholder='Description' value={description} onChange={(e) => setDescription(e.target.value)} />
+			<button onClick={handleSubmit}>Submit</button>
+			<button onClick={onClose}>Cancel</button>
+		</div>
+	) : null;
+};
+
+export default LoginAndProductTable;
