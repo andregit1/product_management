@@ -18,6 +18,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("/api/users")
 @Tag(name = "User Management", description = "APIs for managing users and authentication")
 public class UserController {

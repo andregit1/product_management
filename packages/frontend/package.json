@@ -6,7 +6,6 @@
     "npm": "10.8.1",
     "node": "20.16.0"
   },
-  "proxy": "http://localhost:8080",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
