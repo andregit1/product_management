@@ -18,6 +18,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("/api/products")
 @Tag(name = "Product Management", description = "APIs for managing products and approval flow")
 public class ProductController {
