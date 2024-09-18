@@ -147,55 +147,57 @@ const LoginAndProductTable = () => {
 				</>
 			)}
 
-			<table style={{ marginTop: '2rem' }}>
-				<thead>
-					<tr>
-						<th>Name</th>
-						<th>Price</th>
-						<th>Description</th>
-						{isLoggedIn && <th>Status</th>}
-						<th>Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					{products.length ? (
-						products.map((product) => (
-							<tr key={product.id}>
-								<td>{product.name}</td>
-								<td>{product.price}</td>
-								<td>{product.description}</td>
-								{isLoggedIn && <td>{product.status}</td>}
-								<td>
-									{isLoggedIn && !isAdmin && (
-										<>
-											<button
-												onClick={() => {
-													setEditProduct(product);
-													setIsFormOpen(true);
-												}}
-											>
-												Edit
-											</button>
-											<button onClick={() => handleDelete(product.id)}>Delete</button>
-										</>
-									)}
-
-									{isAdmin && (
-										<>
-											<button onClick={() => handleApprove(product.id)}>Approve</button>
-											<button onClick={() => handleReject(product.id)}>Reject</button>
-										</>
-									)}
-								</td>
-							</tr>
-						))
-					) : (
+			<div className='scrollable-table-container'>
+				<table style={{ marginTop: '2rem' }}>
+					<thead>
 						<tr>
-							<td colSpan='5'>No products available.</td>
+							<th>Name</th>
+							<th>Price</th>
+							<th>Description</th>
+							{isLoggedIn && <th>Status</th>}
+							<th>Actions</th>
 						</tr>
-					)}
-				</tbody>
-			</table>
+					</thead>
+					<tbody>
+						{products.length ? (
+							products.map((product) => (
+								<tr key={product.id}>
+									<td>{product.name}</td>
+									<td>{product.price}</td>
+									<td>{product.description}</td>
+									{isLoggedIn && <td>{product.status}</td>}
+									<td>
+										{isLoggedIn && !isAdmin && (
+											<>
+												<button
+													onClick={() => {
+														setEditProduct(product);
+														setIsFormOpen(true);
+													}}
+												>
+													Edit
+												</button>
+												<button onClick={() => handleDelete(product.id)}>Delete</button>
+											</>
+										)}
+
+										{isAdmin && (
+											<>
+												<button onClick={() => handleApprove(product.id)}>Approve</button>
+												<button onClick={() => handleReject(product.id)}>Reject</button>
+											</>
+										)}
+									</td>
+								</tr>
+							))
+						) : (
+							<tr>
+								<td colSpan='5'>No products available.</td>
+							</tr>
+						)}
+					</tbody>
+				</table>
+			</div>
 		</div>
 	);
 };

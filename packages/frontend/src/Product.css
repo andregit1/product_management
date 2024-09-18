@@ -111,3 +111,24 @@ th {
 .form-inline button:hover {
 	background-color: royalblue;
 }
+
+/* Make the table scrollable */
+.scrollable-table-container {
+	max-height: 600px; /* Set the maximum height of the table container */
+	max-width: 1000px;
+	overflow-y: auto; /* Enable vertical scrolling */
+	border: 1px solid #ddd; /* Optional: add border for visual clarity */
+	border-radius: 5px; /* Optional: round corners for a smoother look */
+	margin-top: 2rem;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse; /* Ensure borders collapse for proper styling */
+}
+
+/* Optional: Add a fixed width to table columns if needed */
+table th,
+table td {
+	width: 150px; /* Adjust width as needed */
+}
