@@ -9,4 +9,7 @@ import java.util.List;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByStatus(Product.Status status);
+
+    // Method to find all products regardless of status
+    List<Product> findAll();
 }

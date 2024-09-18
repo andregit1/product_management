@@ -19,7 +19,8 @@ public class ProductService {
 
     // Get all approved products
     public List<Product> getApprovedProducts() {
-        return productRepository.findByStatus(Product.Status.APPROVED);
+        // return productRepository.findByStatus(Product.Status.APPROVED);
+        return productRepository.findAll();
     }
 
     // Get pending products
@@ -73,13 +74,6 @@ public class ProductService {
     public void deleteProduct(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        // Ensure the current user is the creator of the product
-        User currentUser = userService.getCurrentUser();
-        if (!product.getCreatedBy().getId().equals(currentUser.getId())) {
-            throw new SecurityException("Only the product owner can delete the product.");
-        }
-
         productRepository.deleteById(productId);
     }
 }
