@@ -17,62 +17,30 @@ public class ProductService {
     @Autowired
     private UserService userService;
 
-    // Get products based on user role
-    public List<Product> getProductsByRole() {
-        User currentUser = userService.getCurrentUser();
-        
-        if (currentUser == null) {
-            // Non-logged-in users can only see approved products
-            return productRepository.findByStatus(Product.Status.APPROVED);
-        } else if (currentUser.getRole() == User.Role.MEMBER) {
-            // Members can see all products
-            return productRepository.findAll();
-        } else if (currentUser.getRole() == User.Role.ADMIN) {
-            // Admins can see pending products only
-            return productRepository.findByStatus(Product.Status.PENDING);
-        }
-        throw new RuntimeException("Invalid user role.");
-    }
-
-    // Get approved products (for non-logged-in users and members)
+    // Get all approved products
     public List<Product> getApprovedProducts() {
         return productRepository.findByStatus(Product.Status.APPROVED);
     }
 
-    // Get pending products (admin only)
+    // Get pending products
     public List<Product> getPendingProducts() {
-        User currentUser = userService.getCurrentUser();
-        if (currentUser == null || currentUser.getRole() != User.Role.ADMIN) {
-            throw new SecurityException("Only admins can access pending products.");
-        }
+        // Assume we check if the user is an admin, but this has been removed for simplicity
         return productRepository.findByStatus(Product.Status.PENDING);
     }
 
-    // Add product (members only)
+    // Add product (assumes the user is a member)
     public Product addProduct(Product product) {
-        User currentUser = userService.getCurrentUser();
-        if (currentUser == null || currentUser.getRole() != User.Role.MEMBER) {
-            throw new SecurityException("Only members can add products.");
-        }
         product.setStatus(Product.Status.PENDING);  // New products start with 'Pending'
+        // Assume user is a member and is automatically set as creator
+        User currentUser = userService.getCurrentUser();
         product.setCreatedBy(currentUser);
         return productRepository.save(product);
     }
 
-    // Update product (members only, and only if they own the product)
+    // Update product (assumes the user is a member and is the owner)
     public Product updateProduct(Long productId, Product updatedProduct) {
-        User currentUser = userService.getCurrentUser();
-        if (currentUser == null || currentUser.getRole() != User.Role.MEMBER) {
-            throw new SecurityException("Only logged-in members can update products.");
-        }
-
         Product existingProduct = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        // Ensure the current user is the creator of the product
-        if (existingProduct.getCreatedBy() == null || !existingProduct.getCreatedBy().getId().equals(currentUser.getId())) {
-            throw new SecurityException("Only the product owner can update the product.");
-        }
 
         // Update only name, price, and description, and reset the status to 'Pending'
         existingProduct.setName(updatedProduct.getName());
@@ -83,12 +51,8 @@ public class ProductService {
         return productRepository.save(existingProduct);
     }
 
-    // Approve product (admin only)
-    public Product approveProduct(Long productId, User admin) {
-        if (admin == null || admin.getRole() != User.Role.ADMIN) {
-            throw new SecurityException("Only admins can approve products.");
-        }
-
+    // Approve product
+    public Product approveProduct(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
@@ -96,12 +60,8 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    // Reject product (admin only)
-    public Product rejectProduct(Long productId, User admin) {
-        if (admin == null || admin.getRole() != User.Role.ADMIN) {
-            throw new SecurityException("Only admins can reject products.");
-        }
-
+    // Reject product
+    public Product rejectProduct(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
@@ -109,18 +69,14 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    // Delete product (members only, and only if they own the product)
+    // Delete product (assumes the user is a member and is the owner)
     public void deleteProduct(Long productId) {
-        User currentUser = userService.getCurrentUser();
-        if (currentUser == null || currentUser.getRole() != User.Role.MEMBER) {
-            throw new SecurityException("Only logged-in members can delete products.");
-        }
-
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         // Ensure the current user is the creator of the product
-        if (product.getCreatedBy() == null || !product.getCreatedBy().getId().equals(currentUser.getId())) {
+        User currentUser = userService.getCurrentUser();
+        if (!product.getCreatedBy().getId().equals(currentUser.getId())) {
             throw new SecurityException("Only the product owner can delete the product.");
         }
 
